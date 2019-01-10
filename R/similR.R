@@ -47,7 +47,7 @@ similR=function(toks, vec=NULL, window_weights=1/(1:5), word_vectors_size=30, x_
   dfm=quanteda::dfm_compress(dfm)
   dfm=quanteda::dfm_weight(dfm,scheme='prop')
   simmat=quanteda::textstat_simil(dfm,method=similarity_method)
-  cat('Done in' round(proc.time()[3]-tic),'sec.\n')
+  cat('Done in', round(proc.time()[3]-tic),'sec.\n')
   if(keep_vec) return(list(simmat=simmat,vec=vec)) else return(simmat)
 
 }
