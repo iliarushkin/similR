@@ -47,7 +47,7 @@ similR=function(toks, vec=NULL, window_weights=1/(1:5), word_vectors_size=30, x_
   dfm=quanteda::dfm_compress(dfm)
   dfm=quanteda::dfm_weight(dfm,scheme='prop')
   if(similarity_method[1]=='jsd'){
-    simmat=1-dfm%>%as.matrix()%>%proxy::dist(method=jsd)
+    simmat=1-(dfm%>%as.matrix()%>%proxy::dist(method=jsd))/log(2)
   }else{
     simmat=quanteda::textstat_simil(dfm,method=similarity_method[1])
   }
@@ -71,7 +71,7 @@ similR=function(toks, vec=NULL, window_weights=1/(1:5), word_vectors_size=30, x_
 #'
 #' @return JSD(p||q), a numeric value
 #' @export
-#' @details Assumes that both p and q are normalized (sum(p)=sum(q)=1) and that they contain no NA values. Calculated with base-2 log, so the bounds are [0,1].
+#' @details Assumes that both p and q are normalized (sum(p)=sum(q)=1) and that they contain no NA values. Calculated with base-e log, so the bounds are [0,log(2)].
 jsd=function(p,q){
 
   # p=p/sum(p)
@@ -87,8 +87,8 @@ jsd=function(p,q){
   y[is.infinite(y)]=0
   y[is.na(y)]=0
 
-  #Divide by log(2) so to normalize to the interval
-  return(-0.5*(sum(p*x)+sum(q*y))/log(2))
+
+  return(-0.5*(sum(p*x)+sum(q*y)))
 
 }
 
