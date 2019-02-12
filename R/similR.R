@@ -20,39 +20,52 @@
 #' @export
 #'
 #' @examples
-similR=function(toks, vec=NULL, window_weights=1/(1:5), word_vectors_size=30, x_max=10, n_iter=30, ik=100,
+similR=function(toks, vec=NULL, hotspots=NULL, window_weights=1/(1:5), word_vectors_size=30, x_max=10, n_iter=30, ik=100,
                 clustering_algorithm=c("MacQueen", "Hartigan-Wong", "Lloyd", "Forgy"),
                 clustering_itermax=1000,
-                similarity_method=c("jsd", "correlation", "cosine", "jaccard", "ejaccard", "dice", "edice", "simple matching", "hamann", "faith"),
-                keep_vec=FALSE
+                similarity_method=c("cosine", "jaccard", "ejaccard", "dice", "edice", "simple matching", "hamann", "faith", "correlation", "jsd"),
+                keep_vec=FALSE,
+                keep_hotspots=FALSE
 
                 ){
 
   tic=proc.time()[3]
   cooc=quanteda::fcm(toks,context='window', window=length(window_weights), weights=window_weights, count='weighted')
 
-  #Vectorize using text2vec
-  if(is.null(vec)){
-    glove=text2vec::GlobalVectors$new(word_vectors_size = word_vectors_size, vocabulary = featnames(cooc), x_max = x_max)
-    vec_main=text2vec::fit_transform(cooc,glove,n_iter=n_iter)
-    vec_context=glove$components
-    vec=vec_main+t(vec_context)
+  if(is.null(hotspots)){
+    #Vectorize using text2vec
+    if(is.null(vec)){
+      glove=text2vec::GlobalVectors$new(word_vectors_size = word_vectors_size, vocabulary = featnames(cooc), x_max = x_max)
+      vec_main=text2vec::fit_transform(cooc,glove,n_iter=n_iter)
+      vec_context=glove$components
+      vec=vec_main+t(vec_context)
+    }
+
+    cat('Computing hotspots...\n')
+    hotspots=xmeans(vec, ik=ik, algorithm=clustering_algorithm[1], iter.max = clustering_itermax)$cluster
   }
-
-
-  hotspots=xmeans(vec, ik=ik, algorithm=clustering_algorithm[1], iter.max = clustering_itermax)$cluster
-
   dfm=quanteda::dfm(quanteda::tokens_select(toks,featnames(cooc)))
   colnames(dfm)=hotspots
   dfm=quanteda::dfm_compress(dfm)
   dfm=quanteda::dfm_weight(dfm,scheme='prop')
+  cat('Similarity method:', similarity_method[1],'\n')
   if(similarity_method[1]=='jsd'){
     simmat=1-(dfm%>%as.matrix()%>%proxy::dist(method=jsd))/log(2)
   }else{
-    simmat=quanteda::textstat_simil(dfm,method=similarity_method[1])
+    if(packageVersion('quanteda')=='1.4.0'){
+      simmat=quanteda::textstat_simil_old(dfm,method=similarity_method[1])
+    }else{
+      simmat=quanteda::textstat_simil(dfm,method=similarity_method[1])
+    }
   }
   cat('Done in', round(proc.time()[3]-tic),'sec.\n')
-  if(keep_vec) return(list(simmat=simmat,vec=vec)) else return(simmat)
+  if(keep_hotspots){
+    simmat=list(simmat=simmat, hotspots=hotspots)
+  }else{
+      if(keep_vec) simmat=list(simmat=simmat, vec=vec)
+  }
+
+  return(simmat)
 
 }
 
