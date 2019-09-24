@@ -27,7 +27,6 @@ similR=function(toks, vec=NULL, hotspots=NULL, window_weights=1/(1:5), word_vect
                 keep_vec=FALSE,
                 keep_hotspots=FALSE,
                 ...
-
                 ){
 
   tic=proc.time()[3]
