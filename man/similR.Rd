@@ -39,9 +39,11 @@ similR(toks1, toks2, vec = NULL, hotspots = NULL,
 \item{similarity_method}{as implemented in quanteda::textstat_simil(), plus an extra method 'jsd' for Jensen-Shannon divergence.}
 
 \item{keep_vec}{whether to return the matrix of the word-vectors}
+
+\item{keep_hotspots}{whether to return the hotspots}
 }
 \value{
-depending on keep_vec, either just the simil matrix/object, or a list with that and the matrix of the word-vectors
+a list with simmat (the similarity matrix), vec and hotspots.
 }
 \description{
 Document similarity based on word vectorization

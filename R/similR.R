@@ -17,8 +17,9 @@
 #' @param clustering_itermax as implemented in kmeans()
 #' @param similarity_method as implemented in quanteda::textstat_simil(), plus an extra method 'jsd' for Jensen-Shannon divergence.
 #' @param keep_vec  whether to return the matrix of the word-vectors
+#' @param keep_hotspots  whether to return the hotspots
 #'
-#' @return depending on keep_vec, either just the simil matrix/object, or a list with that and the matrix of the word-vectors
+#' @return a list with simmat (the similarity matrix), vec and hotspots.
 #' @export
 #'
 #' @examples
@@ -65,14 +66,15 @@ similR=function(toks1, toks2, vec=NULL, hotspots=NULL, window_weights=1/(1:5), w
   dfm=quanteda::dfm_weight(dfm,scheme='prop')
 
   cat('Similarity method:', similarity_method[1],'\n')
+  ans=list()
   if(is.null(toks2)){
-    simmat=quanteda::textstat_simil(dfm, method=similarity_method[1])
+    ans$simmat=quanteda::textstat_simil(dfm, method=similarity_method[1])
   }else{
     dfm2=quanteda::dfm_subset(dfm, grepl('^IDtoks2_',quanteda::docnames(dfm)))
     dfm=quanteda::dfm_subset(dfm, grepl('^IDtoks1_',quanteda::docnames(dfm)))
     quanteda::docnames(dfm)=gsub('^IDtoks1_','',quanteda::docnames(dfm))
     quanteda::docnames(dfm2)=gsub('^IDtoks2_','',quanteda::docnames(dfm2))
-    simmat=quanteda::textstat_proxy(y=dfm, x=dfm2, method=similarity_method[1])%>%t()%>%as.matrix()
+    ans$simmat=quanteda::textstat_proxy(y=dfm, x=dfm2, method=similarity_method[1])%>%t()%>%as.matrix()
   }
 
 
@@ -81,12 +83,18 @@ similR=function(toks1, toks2, vec=NULL, hotspots=NULL, window_weights=1/(1:5), w
   # }
   cat('Done in', round(proc.time()[3]-tic),'sec.\n')
   if(keep_hotspots){
-    simmat=list(simmat=simmat, hotspots=hotspots)
+    ans$hotspots=hotspots
   }else{
-      if(keep_vec) simmat=list(simmat=simmat, vec=vec)
+    ans$hotspots=NULL
   }
 
-  return(simmat)
+  if(keep_vec){
+    ans$vec=vec
+  }else{
+    ans$vec=NULL
+  }
+
+  return(ans)
 
 }
 
