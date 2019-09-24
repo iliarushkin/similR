@@ -4,14 +4,19 @@
 \alias{similR}
 \title{similR}
 \usage{
-similR(toks, vec = NULL, window_weights = 1/(1:5),
-  word_vectors_size = 30, x_max = 10, n_iter = 30, ik = 100,
+similR(toks1, toks2, vec = NULL, hotspots = NULL,
+  window_weights = 1/(1:5), word_vectors_size = 300, x_max = 10,
+  n_iter = 30, ik = 100, soft_ik = FALSE,
   clustering_algorithm = c("MacQueen", "Hartigan-Wong", "Lloyd",
-  "Forgy"), clustering_itermax = 1000, similarity_method = "cosine",
-  keep_vec = FALSE)
+  "Forgy"), clustering_itermax = 1000, similarity_method = c("cosine",
+  "jaccard", "ejaccard", "dice", "edice", "simple matching", "hamann",
+  "faith", "correlation", "jsd"), keep_vec = FALSE,
+  keep_hotspots = FALSE, ...)
 }
 \arguments{
-\item{toks}{tokens representing a document corpus}
+\item{toks1}{tokens from a document corpus}
+
+\item{toks2}{tokens from another document corpus (if NULL, assumes toks2=toks1)}
 
 \item{vec}{if NULL, will calculate the vector embedding of words. If this lengthy calculation needs to be skipped - pass the prepared matrix of vectors here (for instance, taken from the previous run of this function with keep_vec=TRUE).}
 
@@ -23,13 +28,15 @@ similR(toks, vec = NULL, window_weights = 1/(1:5),
 
 \item{n_iter}{number of GloVe iterations}
 
-\item{ik}{initial number of clusters (the final one will be greater or equal than this)}
+\item{ik}{initial number of clusters (if soft_ik is TRUE, the final one will be greater or equal than this)}
+
+\item{soft_ik}{whether to use xmeans instead of kmeans for hotspots}
 
 \item{clustering_algorithm}{as implemented in kmeans(), but note that 'Hartigan-Wong' fails for large data, so here we made 'MacQueen' the default.}
 
 \item{clustering_itermax}{as implemented in kmeans()}
 
-\item{similarity_method}{as implemented in quanteda::textstat_simil()}
+\item{similarity_method}{as implemented in quanteda::textstat_simil(), plus an extra method 'jsd' for Jensen-Shannon divergence.}
 
 \item{keep_vec}{whether to return the matrix of the word-vectors}
 }
