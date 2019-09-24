@@ -60,8 +60,8 @@ similR=function(toks1, toks2, vec=NULL, hotspots=NULL, window_weights=1/(1:5), w
     }
   }
 
-  dfm=quanteda::dfm(quanteda::tokens_select(toks1,quanteda::featnames(cooc)))
-  quanteda::featnames(dfm)=hotspots
+  dfm=quanteda::dfm(quanteda::tokens_select(toks1,featnames(cooc)))
+  featnames(dfm)=hotspots
   dfm=quanteda::dfm_compress(dfm)
   dfm=quanteda::dfm_weight(dfm,scheme='prop')
 
