@@ -20,12 +20,13 @@
 #' @export
 #'
 #' @examples
-similR=function(toks, vec=NULL, hotspots=NULL, window_weights=1/(1:5), word_vectors_size=30, x_max=10, n_iter=30, ik=100,
+similR=function(toks, vec=NULL, hotspots=NULL, window_weights=1/(1:5), word_vectors_size=300, x_max=10, n_iter=30, ik=100,
                 clustering_algorithm=c("MacQueen", "Hartigan-Wong", "Lloyd", "Forgy"),
                 clustering_itermax=1000,
                 similarity_method=c("cosine", "jaccard", "ejaccard", "dice", "edice", "simple matching", "hamann", "faith", "correlation", "jsd"),
                 keep_vec=FALSE,
-                keep_hotspots=FALSE
+                keep_hotspots=FALSE,
+                ...
 
                 ){
 
@@ -35,7 +36,7 @@ similR=function(toks, vec=NULL, hotspots=NULL, window_weights=1/(1:5), word_vect
   if(is.null(hotspots)){
     #Vectorize using text2vec
     if(is.null(vec)){
-      glove=text2vec::GlobalVectors$new(word_vectors_size = word_vectors_size, vocabulary = featnames(cooc), x_max = x_max)
+      glove=text2vec::GlobalVectors$new(word_vectors_size = word_vectors_size, vocabulary = featnames(cooc), x_max = x_max, ...)
       vec_main=text2vec::fit_transform(cooc,glove,n_iter=n_iter)
       vec_context=glove$components
       vec=vec_main+t(vec_context)
